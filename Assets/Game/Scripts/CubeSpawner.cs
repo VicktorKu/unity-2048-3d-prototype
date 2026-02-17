@@ -11,6 +11,9 @@ public class CubeSpawner : MonoBehaviour
     [Header("Cube size")]
     [Min(0.01f)] public float scaleMultiplier = 1f;
 
+    private CubeEntity _current;
+    public CubeEntity Current => _current;
+
 
     private void Start()
     {
@@ -22,6 +25,7 @@ public class CubeSpawner : MonoBehaviour
         Vector3 spawn = arena.spawnPoint.position;
 
         var cube = Instantiate(cubePrefab, spawn, Quaternion.identity);
+        _current = cube;
 
         cube.transform.localScale *= scaleMultiplier;
 
