@@ -4,9 +4,6 @@ using TMPro;
 [ExecuteAlways]
 public class CubeFaceLabels : MonoBehaviour
 {
-    [Header("Value")]
-    [Min(2)] public int value = 2;
-
     [Header("References")]
     [SerializeField] private Transform textsRoot;
     [SerializeField] private TextMeshPro textTemplate;
@@ -16,6 +13,7 @@ public class CubeFaceLabels : MonoBehaviour
     [Range(0.1f, 1f)] public float textScaleFactor = 0.35f;
 
     private TextMeshPro[] _texts;
+    private int _currentValue;
 
     private static readonly Vector3[] Directions =
     {
@@ -26,21 +24,25 @@ public class CubeFaceLabels : MonoBehaviour
     {
         if (!textsRoot || !textTemplate) return;
         EnsureTexts();
-        UpdateTexts();
         Reposition();
+
+        var cube = GetComponent<CubeEntity>();
+        if (cube != null) SetValue(cube.Value);
     }
 
     void Awake()
     {
         if (!textsRoot || !textTemplate) return;
         EnsureTexts();
-        UpdateTexts();
         Reposition();
+
+        var cube = GetComponent<CubeEntity>();
+        if (cube != null) SetValue(cube.Value);
     }
 
     public void SetValue(int newValue)
     {
-        value = newValue;
+        _currentValue = newValue;
         UpdateTexts();
     }
 
@@ -51,13 +53,17 @@ public class CubeFaceLabels : MonoBehaviour
         _texts = new TextMeshPro[6];
 
         var existing = textsRoot.GetComponentsInChildren<TextMeshPro>(true);
-        if (existing.Length >= 6)
+        int count = 0;
+
+        foreach (var e in existing)
         {
-            for (int i = 0; i < 6; i++) _texts[i] = existing[i];
-            return;
+            if (e == textTemplate) continue;
+            if (count < 6) _texts[count++] = e;
         }
 
-        for (int i = 0; i < 6; i++)
+        if (count == 6) return;
+
+        for (int i = count; i < 6; i++)
         {
             var t = Instantiate(textTemplate, textsRoot);
             t.name = $"FaceText_{i}";
@@ -72,9 +78,11 @@ public class CubeFaceLabels : MonoBehaviour
     private void UpdateTexts()
     {
         if (_texts == null) return;
-        string s = value.ToString();
+
+        string s = _currentValue.ToString();
         for (int i = 0; i < 6; i++)
-            if (_texts[i]) _texts[i].text = s;
+            if (_texts[i] != null)
+                _texts[i].text = s;
     }
 
     private void Reposition()
@@ -90,12 +98,7 @@ public class CubeFaceLabels : MonoBehaviour
         {
             Vector3 dir = Directions[i];
 
-            Vector3 localPos = new Vector3(
-                dir.x * half.x,
-                dir.y * half.y,
-                dir.z * half.z
-            );
-
+            Vector3 localPos = new Vector3(dir.x * half.x, dir.y * half.y, dir.z * half.z);
 
             float avgScale = (Mathf.Abs(transform.localScale.x) + Mathf.Abs(transform.localScale.y) + Mathf.Abs(transform.localScale.z)) / 3f;
             float localOffset = avgScale > 0f ? surfaceOffset / avgScale : surfaceOffset;
@@ -128,7 +131,6 @@ public class CubeFaceLabels : MonoBehaviour
     {
         if (dir == Vector3.up) return Vector3.forward;
         if (dir == Vector3.down) return Vector3.back;
-
         return Vector3.up;
     }
 }

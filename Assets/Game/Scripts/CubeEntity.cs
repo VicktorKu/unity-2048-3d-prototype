@@ -1,16 +1,14 @@
 using UnityEngine;
-using TMPro;
 
 public class CubeEntity : MonoBehaviour
 {
     [SerializeField] private int value = 2;
-    [SerializeField] private TextMeshPro valueText;
 
     public int Value => value;
 
     private void Awake()
     {
-        UpdateVisual();
+        NotifyValueChanged();
     }
 
     public void SetValue(int newValue)
@@ -22,19 +20,20 @@ public class CubeEntity : MonoBehaviour
         }
 
         value = newValue;
-        UpdateVisual();
+        NotifyValueChanged();
     }
 
     public void DoubleValue()
     {
         value *= 2;
-        UpdateVisual();
+        NotifyValueChanged();
     }
 
-    private void UpdateVisual()
+    private void NotifyValueChanged()
     {
-        if (valueText != null)
-            valueText.text = value.ToString();
+        var labels = GetComponent<CubeFaceLabels>();
+        if (labels != null)
+            labels.SetValue(value);
     }
 
     private bool IsPowerOfTwo(int number)
