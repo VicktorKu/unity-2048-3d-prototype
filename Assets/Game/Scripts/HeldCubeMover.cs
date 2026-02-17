@@ -6,8 +6,11 @@ public class HeldCubeMover : MonoBehaviour
     [SerializeField] private CubeSpawner spawner;
 
     [Header("Move")]
-    [Min(0.00001f)] public float pixelsToWorld = 0.01f; 
-    [Min(0f)] public float sideClearance = 0.05f; 
+    [Min(0.00001f)] public float pixelsToWorld = 0.01f;
+    [Min(0f)] public float sideClearance = 0.05f;
+
+    [Header("Launch")]
+    [Min(0f)] public float launchImpulse = 12f;
 
     private bool _holding;
     private float _startPointerX;
@@ -25,8 +28,8 @@ public class HeldCubeMover : MonoBehaviour
         if (Input.GetMouseButton(0) && _holding)
             HoldMove(cube);
 
-        if (Input.GetMouseButtonUp(0))
-            _holding = false;
+        if (Input.GetMouseButtonUp(0) && _holding)
+            ReleaseAndLaunch(cube);
 #else
         if (Input.touchCount > 0)
         {
@@ -38,8 +41,8 @@ public class HeldCubeMover : MonoBehaviour
             if ((t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary) && _holding)
                 HoldMove(cube);
 
-            if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)
-                _holding = false;
+            if ((t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled) && _holding)
+                ReleaseAndLaunch(cube);
         }
 #endif
     }
@@ -63,15 +66,34 @@ public class HeldCubeMover : MonoBehaviour
         float desiredX = _startCubeX + deltaPixels * pixelsToWorld;
 
         float halfW = arena.width * 0.5f;
-
         float cubeHalfWidth = GetCubeHalfWidthWorld(cube);
 
-        float minX = arena.transform.position.x - halfW + cubeHalfWidth + sideClearance;
-        float maxX = arena.transform.position.x + halfW - cubeHalfWidth - sideClearance;
+        float centerX = arena.transform.position.x;
+        float minX = centerX - halfW + cubeHalfWidth + sideClearance;
+        float maxX = centerX + halfW - cubeHalfWidth - sideClearance;
 
         var pos = cube.transform.position;
         pos.x = Mathf.Clamp(desiredX, minX, maxX);
         cube.transform.position = pos;
+    }
+
+    private void ReleaseAndLaunch(CubeEntity cube)
+    {
+        _holding = false;
+
+        var rb = cube.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            rb.AddForce(Vector3.forward * launchImpulse, ForceMode.Impulse);
+        }
+
+        spawner.ClearCurrentReferenceOnly();
+
+        spawner.SpawnNextDelayed();
     }
 
     private float GetCubeHalfWidthWorld(CubeEntity cube)

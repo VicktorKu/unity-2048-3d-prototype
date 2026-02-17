@@ -273,8 +273,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arena: {fileID: 1214726020}
   spawner: {fileID: 1655924824}
-  pixelsToWorld: 0.01
+  pixelsToWorld: 0.006
   sideClearance: 0.05
+  launchImpulse: 18
 --- !u!1 &490693354
 GameObject:
   m_ObjectHideFlags: 0
@@ -916,6 +917,7 @@ MonoBehaviour:
   arena: {fileID: 1214726020}
   cubePrefab: {fileID: -1102638426259132539, guid: db2a04377cb15f147b5885bd778c1370, type: 3}
   clearance: 0.02
+  spawnDelay: 0.7
   scaleMultiplier: 0.65
 --- !u!1 &1801248189
 GameObject:
