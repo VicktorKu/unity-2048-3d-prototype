@@ -14,6 +14,10 @@ public class ArenaBuilder : MonoBehaviour
     [Min(0.05f)] public float wallThickness = 0.4f;
     [Min(0.2f)] public float wallHeight = 0.6f;
 
+    [Header("Spawn")]
+    public Transform spawnPoint;
+    [Min(0f)] public float spawnMarginFromBottom = 0.6f;
+
     [Header("References")]
     public Transform floor;
     public Transform wallLeft;
@@ -42,5 +46,16 @@ public class ArenaBuilder : MonoBehaviour
         float wallX = width + wallThickness * 2f;
         wallTop.localScale = new Vector3(wallX, wallHeight, wallThickness);
         wallTop.localPosition = new Vector3(0f, wallHeight * 0.5f, halfL + wallThickness * 0.5f);
+
+        if (spawnPoint != null)
+        {
+            float z = -halfL + spawnMarginFromBottom;
+            z = Mathf.Clamp(z, -halfL + 0.05f, halfL - 0.05f);
+
+            spawnPoint.localPosition = new Vector3(0f, 0f, z);
+        }
+
     }
+
+    public float GetFloorTopYWorld() { return transform.TransformPoint(Vector3.zero).y; }
 }
