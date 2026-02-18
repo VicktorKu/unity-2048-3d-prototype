@@ -18,8 +18,7 @@ public class ScoreSystem : MonoBehaviour
 
     public void Add(int amount)
     {
-        if (amount <= 0) return;
-        Debug.LogWarning(amount);
+        if (amount <= 0) return;        
         Score += amount;
     }
 
