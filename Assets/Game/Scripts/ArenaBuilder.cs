@@ -31,6 +31,12 @@ public class ArenaBuilder : MonoBehaviour
     [Min(0f)] public float startBarYOffset = 0.01f;
     [Min(-5f)] public float startBarZOffset = 0f;
 
+    [Header("Start zone (trigger)")]
+    public BoxCollider startZoneTrigger;
+    [Min(0.01f)] public float startZoneHeight = 1.0f; 
+    [Min(0f)] public float startZoneYOffset = 0.5f;
+
+
     void OnValidate() => Rebuild();
 
     public void Rebuild()
@@ -76,6 +82,25 @@ public class ArenaBuilder : MonoBehaviour
             startBar.localScale = new Vector3(width, startBarHeight, startBarThickness);
             startBar.localPosition = new Vector3(0f, startBarYOffset, finalZ);
         }
+
+        if (startZoneTrigger != null)
+        {
+            startZoneTrigger.isTrigger = true;
+
+            float halfL2 = length * 0.5f;
+
+            float startLineZ = startBar != null ? startBar.localPosition.z : (-halfL2 + spawnMarginFromBottom + startBarZOffset);
+
+            float bottomZ = -halfL2;
+
+            float zoneLength = Mathf.Max(0.01f, startLineZ - bottomZ);
+
+            float centerZ = bottomZ + zoneLength * 0.5f;
+
+            startZoneTrigger.size = new Vector3(width, startZoneHeight, zoneLength);
+            startZoneTrigger.center = new Vector3(0f, startZoneYOffset, centerZ);
+        }
+
     }
 
     public float GetFloorTopYWorld() { return transform.TransformPoint(Vector3.zero).y; }

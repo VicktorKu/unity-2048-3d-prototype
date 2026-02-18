@@ -188,6 +188,7 @@ GameObject:
   - component: {fileID: -1102638426259132539}
   - component: {fileID: -6245722971052701242}
   - component: {fileID: 1143806515138974706}
+  - component: {fileID: 3154291656670718408}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -354,7 +355,6 @@ MonoBehaviour:
   mergeUpImpulse: 4
   mergeSideImpulse: 2
   minTowardSpeed: 0.1
-  allowProximityMerge: 0
   cubeLayer:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -372,6 +372,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 600edf2e75ce85d47abed86d6c3f4a86, type: 2}
   targetRenderer: {fileID: 4522372189343869994}
+--- !u!114 &3154291656670718408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1358533313528728860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab50efefec2268c40bcd943068bab4d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2380632489312951735
 GameObject:
   m_ObjectHideFlags: 0
