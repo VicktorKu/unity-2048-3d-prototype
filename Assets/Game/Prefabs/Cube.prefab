@@ -351,8 +351,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraRadius: 0.1
-  mergeUpImpulse: 5
-  mergeSideImpulse: 3
+  mergeUpImpulse: 4
+  mergeSideImpulse: 2
+  minTowardSpeed: 0.1
+  allowProximityMerge: 0
   cubeLayer:
     serializedVersion: 2
     m_Bits: 4294967295

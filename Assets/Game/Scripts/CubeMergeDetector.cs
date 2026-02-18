@@ -10,7 +10,10 @@ public class CubeMergeDetector : MonoBehaviour
     [Header("Merge impulse")]
     [Min(0f)] public float mergeUpImpulse = 2f;
     [Min(0f)] public float mergeSideImpulse = 0.5f;
-    
+
+    [Header("Merge condition")]
+    [Min(0f)] public float minTowardSpeed = 0.05f;
+
     public LayerMask cubeLayer = ~0;  
 
     private CubeEntity _self;
@@ -30,11 +33,11 @@ public class CubeMergeDetector : MonoBehaviour
         if (_mergeLocked) return;
         if (_self == null) return;
 
-        TryProximityMerge();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+
         if (_mergeLocked) return;
 
         var otherEntity = collision.collider.GetComponent<CubeEntity>();
@@ -42,54 +45,19 @@ public class CubeMergeDetector : MonoBehaviour
         if (otherEntity == null || otherMerge == null) return;
 
         if (otherEntity.Value != _self.Value) return;
-
         if (gameObject.GetInstanceID() > otherEntity.gameObject.GetInstanceID()) return;
+
+        var otherRb = collision.rigidbody;
+        if (otherRb == null) return;
+
+        Vector3 dirToOther = (transform.position - otherEntity.transform.position).normalized;
+        float towardSpeed = Vector3.Dot(collision.relativeVelocity, dirToOther);
+
+        if (towardSpeed < minTowardSpeed) return;
+
 
         LockBoth(otherMerge);
         PerformMerge(otherEntity);
-    }
-
-    private void TryProximityMerge()
-    {
-        float half = GetHalfSizeWorld();
-        float radius = half + extraRadius;
-
-        var hits = Physics.OverlapSphere(transform.position, radius, cubeLayer, QueryTriggerInteraction.Ignore);
-
-        CubeEntity best = null;
-        CubeMergeDetector bestMerge = null;
-        float bestDistSq = float.MaxValue;
-
-        for (int i = 0; i < hits.Length; i++)
-        {
-            if (hits[i].attachedRigidbody == _rb) continue;
-
-            var otherEntity = hits[i].GetComponent<CubeEntity>();
-            var otherMerge = hits[i].GetComponent<CubeMergeDetector>();
-            var otherRb = hits[i].attachedRigidbody;
-
-            if (otherEntity == null || otherMerge == null || otherRb == null) continue;
-            if (otherMerge._mergeLocked) continue;
-            if (otherEntity.Value != _self.Value) continue;
-
-            if (gameObject.GetInstanceID() > otherEntity.gameObject.GetInstanceID()) continue;
-
-            float dSq = (otherEntity.transform.position - transform.position).sqrMagnitude;
-            if (dSq < bestDistSq)
-            {
-                bestDistSq = dSq;
-                best = otherEntity;
-                bestMerge = otherMerge;
-            }
-        }
-
-        if (best == null) return;
-
-        LockBoth(bestMerge);
-
-        best.transform.position = transform.position;
-
-        PerformMerge(best);
     }
 
     private void LockBoth(CubeMergeDetector other)

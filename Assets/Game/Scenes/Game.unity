@@ -375,9 +375,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arena: {fileID: 1214726020}
   spawner: {fileID: 1655924824}
-  pixelsToWorld: 0.006
+  cam: {fileID: 963194227}
   sideClearance: 0.05
   launchImpulse: 18
+  bottomScreenZone: 0.35
 --- !u!1 &490693354
 GameObject:
   m_ObjectHideFlags: 0
