@@ -1,10 +1,13 @@
+using System;
 using UnityEngine;
 
 public class CubeEntity : MonoBehaviour
 {
     [SerializeField] private int value = 2;
-
+    
     public int Value => value;
+    
+    public event Action<int> OnValueChanged;
 
     private void Awake()
     {
@@ -25,6 +28,7 @@ public class CubeEntity : MonoBehaviour
 
     public void DoubleValue()
     {
+        OnValueChanged?.Invoke(value);
         value *= 2;
         NotifyValueChanged();
     }

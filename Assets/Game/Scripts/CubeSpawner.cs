@@ -5,6 +5,7 @@ public class CubeSpawner : MonoBehaviour
 {
     [SerializeField] private ArenaBuilder arena;
     [SerializeField] private CubeEntity cubePrefab;
+    [SerializeField] private ScoreCubeBinder scoreBinder;
 
     [Header("Spawn")]
     [Min(0f)] public float clearance = 0.02f;
@@ -31,6 +32,9 @@ public class CubeSpawner : MonoBehaviour
         var cube = Instantiate(cubePrefab, spawn, Quaternion.identity);
         _current = cube;
 
+        if (scoreBinder != null)
+            scoreBinder.RegisterCube(cube);
+
         cube.transform.localScale *= scaleMultiplier;
 
         float floorTopY = arena.GetFloorTopYWorld();
@@ -47,6 +51,7 @@ public class CubeSpawner : MonoBehaviour
 
         return cube;
     }
+
 
     private float GetCubeHalfHeightWorld(CubeEntity cube)
     {
