@@ -5,7 +5,7 @@ using UnityEngine;
 public class CubeEntity : MonoBehaviour
 {
     [SerializeField] private int value = 2;
-    
+    public bool IsLaunched { get; private set; }
     public int Value => value;
     
     public event Action<int> OnValueChanged;
@@ -19,7 +19,6 @@ public class CubeEntity : MonoBehaviour
     {
         if (!IsPowerOfTwo(newValue))
         {
-            Debug.LogError("Value must be power of two.");
             return;
         }
 
@@ -52,6 +51,11 @@ public class CubeEntity : MonoBehaviour
     public void PlayMergeEffect()
     {
         StartCoroutine(MergeScaleRoutine());
+    }
+
+    public void MarkLaunched()
+    {
+        IsLaunched = true;
     }
 
     private IEnumerator MergeScaleRoutine()

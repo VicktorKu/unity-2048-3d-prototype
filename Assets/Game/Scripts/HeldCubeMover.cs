@@ -113,6 +113,7 @@ public class HeldCubeMover : MonoBehaviour
     private void ReleaseAndLaunch(CubeEntity cube)
     {
         _holding = false;
+        cube.MarkLaunched();
 
         var rb = cube.GetComponent<Rigidbody>();
         if (rb != null)

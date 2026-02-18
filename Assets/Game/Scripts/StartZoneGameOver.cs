@@ -1,10 +1,18 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class StartZoneGameOver : MonoBehaviour
 {
-    [SerializeField] private float confirmExitDelay = 0.15f;
+    [Header("How long cube may stay inside start zone before it is considered a loss")]
+    [SerializeField] private float insideTimeout = 0.45f;
+
+    [Header("Cube is considered stopped if speed is below this threshold")]
+    [SerializeField] private float stoppedSpeed = 0.05f;
 
     private bool _gameOver;
+
+    private readonly Dictionary<StartZoneState, Coroutine> _checks = new();
 
     private void OnTriggerEnter(Collider other)
     {
@@ -12,37 +20,71 @@ public class StartZoneGameOver : MonoBehaviour
 
         var cube = other.GetComponent<CubeEntity>();
         if (cube == null) return;
+        if (!cube.IsLaunched) return;
 
         var state = other.GetComponent<StartZoneState>();
         if (state == null) state = other.gameObject.AddComponent<StartZoneState>();
 
         state.IsInside = true;
+        state.LastEnterTime = Time.time;
 
-        if (!state.HasLeftStartZone) return;
+        if (_checks.TryGetValue(state, out var running) && running != null)
+            StopCoroutine(running);
 
-        GameOverController.Instance?.TriggerGameOver();
+        _checks[state] = StartCoroutine(CheckStayedInside(other, state, state.LastEnterTime));
     }
 
     private void OnTriggerExit(Collider other)
     {
         var cube = other.GetComponent<CubeEntity>();
         if (cube == null) return;
+        if (!cube.IsLaunched) return;
 
         var state = other.GetComponent<StartZoneState>();
-        if (state == null) state = other.gameObject.AddComponent<StartZoneState>();
+        if (state == null) return;
 
         state.IsInside = false;
-        state.ExitTime = Time.time;
 
-        StartCoroutine(ConfirmExit(state));
+        if (_checks.TryGetValue(state, out var running) && running != null)
+            StopCoroutine(running);
+
+        _checks.Remove(state);
     }
 
-    private System.Collections.IEnumerator ConfirmExit(StartZoneState state)
+    private IEnumerator CheckStayedInside(Collider cubeCollider, StartZoneState state, float enterTimeSnapshot)
     {
-        float t = state.ExitTime;
-        yield return new WaitForSeconds(confirmExitDelay);
+        yield return new WaitForSeconds(insideTimeout);
 
-        if (!state.IsInside && Mathf.Approximately(state.ExitTime, t))
-            state.HasLeftStartZone = true;
+        if (_gameOver) yield break;
+
+        if (!state.IsInside) yield break;
+        if (!Mathf.Approximately(state.LastEnterTime, enterTimeSnapshot)) yield break;
+
+        var cube = cubeCollider.GetComponent<CubeEntity>();
+        if (cube == null) yield break;
+
+        if (!cube.IsLaunched)
+        {
+            yield break;
+        }
+
+        var rb = cubeCollider.attachedRigidbody;
+        if (rb != null)
+        {
+            if (rb.IsSleeping() || rb.velocity.sqrMagnitude <= stoppedSpeed * stoppedSpeed)
+            {
+                _gameOver = true;
+                GameOverController.Instance?.TriggerGameOver();
+            }
+            else
+            {
+                _checks[state] = StartCoroutine(CheckStayedInside(cubeCollider, state, state.LastEnterTime));
+            }
+        }
+        else
+        {
+            _gameOver = true;
+            GameOverController.Instance?.TriggerGameOver();
+        }
     }
 }
