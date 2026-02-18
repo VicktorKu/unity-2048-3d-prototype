@@ -69,6 +69,7 @@ public class CubeMergeDetector : MonoBehaviour
     private void PerformMerge(CubeEntity other)
     {
         _self.DoubleValue();
+        _self.PlayMergeEffect();
 
         var rb = GetComponent<Rigidbody>();
         if (rb != null)

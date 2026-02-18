@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class CubeEntity : MonoBehaviour
@@ -48,4 +49,37 @@ public class CubeEntity : MonoBehaviour
     {
         return number > 0 && (number & (number - 1)) == 0;
     }
+    public void PlayMergeEffect()
+    {
+        StartCoroutine(MergeScaleRoutine());
+    }
+
+    private IEnumerator MergeScaleRoutine()
+    {
+        Vector3 original = transform.localScale;
+        Vector3 target = original * 1.15f;
+
+        float t = 0f;
+        float duration = 0.08f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float lerp = t / duration;
+            transform.localScale = Vector3.Lerp(original, target, lerp);
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float lerp = t / duration;
+            transform.localScale = Vector3.Lerp(target, original, lerp);
+            yield return null;
+        }
+
+        transform.localScale = original;
+    }
+
 }
