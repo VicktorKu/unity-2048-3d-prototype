@@ -20,9 +20,7 @@ public class StartZoneGameOver : MonoBehaviour
 
         if (!state.HasLeftStartZone) return;
 
-        _gameOver = true;
-        Debug.Log("GAME OVER: cube re-entered start zone");
-        Time.timeScale = 0f;
+        GameOverController.Instance?.TriggerGameOver();
     }
 
     private void OnTriggerExit(Collider other)
