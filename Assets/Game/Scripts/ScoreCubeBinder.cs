@@ -27,6 +27,6 @@ public class ScoreCubeBinder : MonoBehaviour
 
     private void OnCubeMergedBaseValue(int baseValue)
     {
-        scoreSystem.Add(baseValue);
+        scoreSystem.Add(baseValue/2);
     }
 }
