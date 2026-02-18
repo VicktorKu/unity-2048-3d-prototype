@@ -13,7 +13,6 @@ public class HeldCubeMover : MonoBehaviour
     [Min(0f)] public float launchImpulse = 12f;
 
     [Header("Hold area")]
-    [Tooltip("Дозволяти керування лише коли палець внизу екрана (0..1)")]
     [Range(0f, 1f)] public float bottomScreenZone = 0.35f;
 
     private bool _holding;
