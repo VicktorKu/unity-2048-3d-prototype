@@ -34,6 +34,10 @@ public class CubeEntity : MonoBehaviour
         var labels = GetComponent<CubeFaceLabels>();
         if (labels != null)
             labels.SetValue(value);
+
+        var color = GetComponent<CubeColorVisual>();
+        if (color != null)
+            color.SetValue(value);
     }
 
     private bool IsPowerOfTwo(int number)
