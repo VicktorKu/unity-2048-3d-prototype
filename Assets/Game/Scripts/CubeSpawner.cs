@@ -42,7 +42,8 @@ public class CubeSpawner : MonoBehaviour
         var rb = cube.GetComponent<Rigidbody>();
         if (rb != null) rb.isKinematic = true;
 
-        cube.SetValue(2);
+        int v = Random.value < 0.75f ? 2 : 4;
+        cube.SetValue(v);
 
         return cube;
     }
