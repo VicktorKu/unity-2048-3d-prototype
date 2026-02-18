@@ -24,6 +24,13 @@ public class ArenaBuilder : MonoBehaviour
     public Transform wallRight;
     public Transform wallTop;
 
+    [Header("Start bar (visual only)")]
+    public Transform startBar;
+    [Min(0.01f)] public float startBarThickness = 0.05f;
+    [Min(0.01f)] public float startBarHeight = 0.05f;
+    [Min(0f)] public float startBarYOffset = 0.01f;
+    [Min(-5f)] public float startBarZOffset = 0f;
+
     void OnValidate() => Rebuild();
 
     public void Rebuild()
@@ -55,6 +62,20 @@ public class ArenaBuilder : MonoBehaviour
             spawnPoint.localPosition = new Vector3(0f, 0f, z);
         }
 
+        if (startBar != null)
+        {
+            float halfWl = width * 0.5f;
+            float halfLl = length * 0.5f;
+
+
+            float baseZ = -halfLl + spawnMarginFromBottom;
+            baseZ = Mathf.Clamp(baseZ, -halfLl + 0.05f, halfLl - 0.05f);
+
+            float finalZ = baseZ + startBarZOffset;
+
+            startBar.localScale = new Vector3(width, startBarHeight, startBarThickness);
+            startBar.localPosition = new Vector3(0f, startBarYOffset, finalZ);
+        }
     }
 
     public float GetFloorTopYWorld() { return transform.TransformPoint(Vector3.zero).y; }
