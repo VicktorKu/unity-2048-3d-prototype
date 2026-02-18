@@ -55,6 +55,8 @@ public class GameOverController : MonoBehaviour
 
         if (panel != null)
             panel.SetActive(true);
+
+        AudioManager.Instance?.PlayGameOver();
     }
 
     private void DisableGameSystems()

@@ -89,6 +89,8 @@ public class CubeMergeDetector : MonoBehaviour
 
         Destroy(other.gameObject);
         _mergeLocked = false;
+
+        AudioManager.Instance?.PlayMerge();
     }
 
     private float GetHalfSizeWorld()

@@ -127,6 +127,8 @@ public class HeldCubeMover : MonoBehaviour
 
         spawner.ClearCurrentReferenceOnly();
         spawner.SpawnNextDelayed();
+
+        AudioManager.Instance?.PlayLaunch();
     }
 
 
