@@ -1412,6 +1412,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   insideTimeout: 0.45
   stoppedSpeed: 0.05
+  lineRenderer: {fileID: 707702130}
+  safeColor: {r: 0.43596363, g: 1, b: 0.19999999, a: 1}
+  dangerColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  colorProperty: _BaseColor
 --- !u!4 &854057280
 Transform:
   m_ObjectHideFlags: 0
