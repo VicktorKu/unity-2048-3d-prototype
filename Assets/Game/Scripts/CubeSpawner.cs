@@ -36,6 +36,7 @@ public class CubeSpawner : MonoBehaviour
             scoreBinder.RegisterCube(cube);
 
         cube.transform.localScale *= scaleMultiplier;
+        cube.CacheBaseScale();
 
         float floorTopY = arena.GetFloorTopYWorld();
         float cubeHalfHeight = GetCubeHalfHeightWorld(cube);

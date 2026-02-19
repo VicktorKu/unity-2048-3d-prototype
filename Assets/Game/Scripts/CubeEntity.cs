@@ -10,8 +10,12 @@ public class CubeEntity : MonoBehaviour
     
     public event Action<int> OnValueChanged;
 
+    private Vector3 _baseScale;
+    private Coroutine _mergeScaleRoutine;
+
     private void Awake()
     {
+        _baseScale = transform.localScale;
         NotifyValueChanged();
     }
 
@@ -50,7 +54,11 @@ public class CubeEntity : MonoBehaviour
     }
     public void PlayMergeEffect()
     {
-        StartCoroutine(MergeScaleRoutine());
+        if (_mergeScaleRoutine != null)
+            StopCoroutine(_mergeScaleRoutine);
+        
+        transform.localScale = _baseScale;
+        _mergeScaleRoutine = StartCoroutine(MergeScaleRoutine(_baseScale));
     }
 
     public void MarkLaunched()
@@ -58,32 +66,33 @@ public class CubeEntity : MonoBehaviour
         IsLaunched = true;
     }
 
-    private IEnumerator MergeScaleRoutine()
+    public void CacheBaseScale()
     {
-        Vector3 original = transform.localScale;
-        Vector3 target = original * 1.15f;
-
-        float t = 0f;
-        float duration = 0.08f;
-
-        while (t < duration)
-        {
-            t += Time.deltaTime;
-            float lerp = t / duration;
-            transform.localScale = Vector3.Lerp(original, target, lerp);
-            yield return null;
-        }
-
-        t = 0f;
-        while (t < duration)
-        {
-            t += Time.deltaTime;
-            float lerp = t / duration;
-            transform.localScale = Vector3.Lerp(target, original, lerp);
-            yield return null;
-        }
-
-        transform.localScale = original;
+        _baseScale = transform.localScale;
     }
 
+    private IEnumerator MergeScaleRoutine(Vector3 baseScale)
+    {
+        Vector3 target = baseScale * 1.15f;
+
+        float duration = 0.08f;
+
+        for (float t = 0f; t < duration; t += Time.deltaTime)
+        {
+            float lerp = t / duration;
+            transform.localScale = Vector3.Lerp(baseScale, target, lerp);
+            yield return null;
+        }
+        transform.localScale = target;
+
+        for (float t = 0f; t < duration; t += Time.deltaTime)
+        {
+            float lerp = t / duration;
+            transform.localScale = Vector3.Lerp(target, baseScale, lerp);
+            yield return null;
+        }
+
+        transform.localScale = baseScale;
+        _mergeScaleRoutine = null;
+    }
 }
