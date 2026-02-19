@@ -86,22 +86,27 @@ public class StartZoneGameOver : MonoBehaviour
 
         if (_gameOver) yield break;
 
+        if (cubeCollider == null || cubeCollider.gameObject == null)
+        {
+            _checks.Remove(state);
+            yield break;
+        }
+
+        if (state == null) yield break;
         if (!state.IsInside) yield break;
         if (!Mathf.Approximately(state.LastEnterTime, enterTimeSnapshot)) yield break;
 
         var cube = cubeCollider.GetComponent<CubeEntity>();
-        if (cube == null) yield break;
+        if (cube == null) { _checks.Remove(state); yield break; }
         if (!cube.IsLaunched) yield break;
 
         var rb = cubeCollider.attachedRigidbody;
-
         if (rb != null)
         {
             if (rb.IsSleeping() || rb.velocity.sqrMagnitude <= stoppedSpeed * stoppedSpeed)
             {
                 _gameOver = true;
                 ApplyLineColor(dangerColor);
-
                 GameOverController.Instance?.TriggerGameOver();
             }
             else
