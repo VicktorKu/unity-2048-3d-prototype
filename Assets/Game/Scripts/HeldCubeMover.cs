@@ -14,9 +14,19 @@ public class HeldCubeMover : MonoBehaviour
 
     [Header("Hold area")]
     [Range(0f, 1f)] public float bottomScreenZone = 0.35f;
+    
+    [Header("Power control")]
+    [Min(0f)] public float maxPullBackDistance = 0.6f;
+    [Range(0f, 1f)] public float minPowerPercent = 0.5f;
+    [Min(1f)] public float pullBackPixelsForMax = 220f;
 
+    [SerializeField] private LaunchPowerUI powerUI;
+    
     private bool _holding;
     private float _grabOffsetXWorld;
+    private float _grabStartScreenY;
+    private Vector3 _holdStartWorldPos;
+    private float _currentPower01 = 0f;
 
     private void Awake()
     {
@@ -69,6 +79,11 @@ public class HeldCubeMover : MonoBehaviour
     {
         _holding = true;
 
+        _grabStartScreenY = screenPos.y;
+        _holdStartWorldPos = cube.transform.position;
+        _currentPower01 = 0f;
+        powerUI?.SetPull01(_currentPower01);
+
         var rb = cube.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -97,9 +112,20 @@ public class HeldCubeMover : MonoBehaviour
         float minX = centerX - halfW + cubeHalfWidth + sideClearance;
         float maxX = centerX + halfW - cubeHalfWidth - sideClearance;
 
-        var pos = cube.transform.position;
+        float dy = (_grabStartScreenY - screenPos.y);
+        float pull01 = Mathf.Clamp01(dy / pullBackPixelsForMax);
+
+        float pullWorld = pull01 * maxPullBackDistance;
+
+        var pos = _holdStartWorldPos;
         pos.x = Mathf.Clamp(desiredX, minX, maxX);
+
+        pos += -arena.transform.forward * pullWorld;
+
         cube.transform.position = pos;
+
+        _currentPower01 = pull01;
+        powerUI?.SetPull01(_currentPower01);
     }
 
     private float ScreenXToWorldX(Vector2 screenPos, Vector3 cubeWorldPos)
@@ -114,6 +140,8 @@ public class HeldCubeMover : MonoBehaviour
         _holding = false;
         cube.MarkLaunched();
 
+        float powerMul = Mathf.Lerp(minPowerPercent, 1f, _currentPower01);
+
         var rb = cube.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -122,15 +150,16 @@ public class HeldCubeMover : MonoBehaviour
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
 
-            rb.AddForce(arena.transform.forward * launchImpulse, ForceMode.Impulse);
+            rb.AddForce(arena.transform.forward * (launchImpulse * powerMul), ForceMode.Impulse);
         }
+
+        powerUI?.Hide();
 
         spawner.ClearCurrentReferenceOnly();
         spawner.SpawnNextDelayed();
 
         AudioManager.Instance?.PlayLaunch();
     }
-
 
     private float GetCubeHalfWidthWorld(CubeEntity cube)
     {
