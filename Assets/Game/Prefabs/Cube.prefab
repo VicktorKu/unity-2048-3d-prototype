@@ -355,6 +355,8 @@ MonoBehaviour:
   mergeUpImpulse: 4
   mergeSideImpulse: 2
   minTowardSpeed: 0.1
+  maxLinearSpeed: 8
+  maxAngularSpeed: 10
   cubeLayer:
     serializedVersion: 2
     m_Bits: 4294967295

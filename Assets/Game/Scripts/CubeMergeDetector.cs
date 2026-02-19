@@ -14,6 +14,10 @@ public class CubeMergeDetector : MonoBehaviour
     [Header("Merge condition")]
     [Min(0f)] public float minTowardSpeed = 0.05f;
 
+    [Header("Velocity limits")]
+    [Min(0f)] public float maxLinearSpeed = 8f;
+    [Min(0f)] public float maxAngularSpeed = 20f;
+
     public LayerMask cubeLayer = ~0;  
 
     private CubeEntity _self;
@@ -84,7 +88,8 @@ public class CubeMergeDetector : MonoBehaviour
                 Vector3.up * mergeUpImpulse +
                 randomSide * mergeSideImpulse;
 
-            rb.AddForce(impulse, ForceMode.Impulse);
+            rb.AddForce(impulse, ForceMode.Impulse);        
+            ClampVelocity(rb);
         }
 
         Destroy(other.gameObject);
@@ -99,5 +104,13 @@ public class CubeMergeDetector : MonoBehaviour
         float halfY = _col.size.y * 0.5f * transform.lossyScale.y;
         float halfZ = _col.size.z * 0.5f * transform.lossyScale.z;
         return Mathf.Max(halfX, halfY, halfZ);
+    }
+
+    private void ClampVelocity(Rigidbody rb)
+    {
+        if (rb.velocity.sqrMagnitude > maxLinearSpeed * maxLinearSpeed)
+            rb.velocity = rb.velocity.normalized * maxLinearSpeed;
+
+        rb.angularVelocity = Vector3.ClampMagnitude(rb.angularVelocity, maxAngularSpeed);
     }
 }
