@@ -1677,8 +1677,8 @@ MonoBehaviour:
   insideTimeout: 0.45
   stoppedSpeed: 0.05
   lineRenderer: {fileID: 707702130}
-  safeColor: {r: 1, g: 1, b: 1, a: 1}
-  dangerColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  safeColor: {r: 0.5372549, g: 1, b: 1, a: 1}
+  dangerColor: {r: 0.9056604, g: 0.36311856, b: 0.36311856, a: 1}
   colorProperty: _BaseColor
 --- !u!4 &854057280
 Transform:
