@@ -1660,8 +1660,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5, y: 1, z: 7.6}
-  m_Center: {x: 0, y: 0.5, z: -2.2}
+  m_Size: {x: 5, y: 1, z: 7.725}
+  m_Center: {x: 0, y: 0.5, z: -2.1375}
 --- !u!114 &854057279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1980,7 +1980,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scoreText: {fileID: 872835692}
   bestText: {fileID: 62763143}
-  scorePrefix: 
+  scorePrefix: 'Score:'
   bestPrefix: 'Best: '
   progressFill: {fileID: 2040277618}
   punchScale: 1.12
