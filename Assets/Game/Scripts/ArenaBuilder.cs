@@ -89,12 +89,21 @@ public class ArenaBuilder : MonoBehaviour
 
             float halfL2 = length * 0.5f;
 
-            float startLineZ = startBar != null ? startBar.localPosition.z : (-halfL2 + spawnMarginFromBottom + startBarZOffset);
-
             float bottomZ = -halfL2;
 
-            float zoneLength = Mathf.Max(0.01f, startLineZ - bottomZ);
+            float lineCenterZ = startBar != null
+                ? startBar.localPosition.z
+                : (-halfL2 + spawnMarginFromBottom + startBarZOffset);
 
+            float halfLineZ = 0f;
+            if (startBar != null)
+                halfLineZ = Mathf.Abs(startBar.localScale.z) * 0.5f;
+            else
+                halfLineZ = startBarThickness * 0.5f;
+
+            float zoneTopZ = lineCenterZ + halfLineZ;
+
+            float zoneLength = Mathf.Max(0.01f, zoneTopZ - bottomZ);
             float centerZ = bottomZ + zoneLength * 0.5f;
 
             startZoneTrigger.size = new Vector3(width, startZoneHeight, zoneLength);
