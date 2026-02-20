@@ -5,10 +5,7 @@ using UnityEngine;
 public class StartZoneGameOver : MonoBehaviour
 {
     [Header("How long cube may stay inside start zone before it is considered a loss")]
-    [SerializeField] private float insideTimeout = 0.45f;
-
-    [Header("Cube is considered stopped if speed is below this threshold")]
-    [SerializeField] private float stoppedSpeed = 0.05f;
+    [SerializeField] private float insideTimeout = 2f;
 
     [Header("Line visuals")]
     [SerializeField] private Renderer lineRenderer;
@@ -103,7 +100,7 @@ public class StartZoneGameOver : MonoBehaviour
         var rb = cubeCollider.attachedRigidbody;
         if (rb != null)
         {
-            if (rb.IsSleeping() || rb.velocity.sqrMagnitude <= stoppedSpeed * stoppedSpeed)
+            if (rb.IsSleeping())
             {
                 _gameOver = true;
                 ApplyLineColor(dangerColor);
