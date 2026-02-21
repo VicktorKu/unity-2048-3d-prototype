@@ -12,6 +12,9 @@ public class StartZoneGameOver : MonoBehaviour
     [SerializeField] private Color safeColor = new Color(1f, 0.9f, 0.2f, 1f);
     [SerializeField] private Color dangerColor = new Color(1f, 0.2f, 0.2f, 1f);
     [SerializeField] private string colorProperty = "_BaseColor";
+
+    [SerializeField] private DeathZoneUI deathUI;
+
     private int _preferredColorId;
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -51,6 +54,8 @@ public class StartZoneGameOver : MonoBehaviour
         state.LastEnterTime = Time.time;
 
         BeginDanger(state);
+        deathUI?.HideFill();
+
 
         if (_checks.TryGetValue(state, out var running) && running != null)
             StopCoroutine(running);
@@ -77,48 +82,57 @@ public class StartZoneGameOver : MonoBehaviour
 
         _checks.Remove(state);
 
+        deathUI?.HideFill();
+
         EndDanger(state);
     }
 
     private IEnumerator CheckStayedInside(Collider cubeCollider, StartZoneState state, float enterTimeSnapshot)
     {
-        yield return new WaitForSeconds(insideTimeout);
+        float startTime = Time.time;
 
-        GameStateManager.Instance.IsGameOver();
-
-        if (cubeCollider == null || cubeCollider.gameObject == null)
+        while (true)
         {
-            _checks.Remove(state);
-            yield break;
-        }
+            if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+                yield break;
 
-        if (state == null) yield break;
-        if (!state.IsInside) yield break;
-        if (!Mathf.Approximately(state.LastEnterTime, enterTimeSnapshot)) yield break;
+            if (cubeCollider == null || cubeCollider.gameObject == null)
+            {
+                _checks.Remove(state);
+                deathUI?.HideFill();
+                deathUI?.Hide();
+                yield break;
+            }
+
+            if (state == null) yield break;
+            if (!state.IsInside) { deathUI?.HideFill(); deathUI?.Hide(); yield break; }
+            if (!Mathf.Approximately(state.LastEnterTime, enterTimeSnapshot)) yield break;
+
+            float elapsed = Time.time - startTime;
+            float t01 = elapsed / insideTimeout;
+
+            deathUI?.SetProgress01(t01);
+
+            if (t01 >= 1f)
+                break;
+
+            yield return null;
+        }
 
         var cube = cubeCollider.GetComponent<CubeEntity>();
         if (cube == null) { _checks.Remove(state); yield break; }
         if (!cube.IsLaunched) yield break;
 
         var rb = cubeCollider.attachedRigidbody;
-        if (rb != null)
+        if (rb != null && !rb.IsSleeping())
         {
-            if (rb.IsSleeping())
-            {
-                ApplyLineColor(dangerColor);
-                GameOverService.Instance.TriggerGameOver();
-                yield break;
-            }
-            else
-            {
-                _checks[state] = StartCoroutine(CheckStayedInside(cubeCollider, state, state.LastEnterTime));
-            }
+            state.LastEnterTime = Time.time;
+            _checks[state] = StartCoroutine(CheckStayedInside(cubeCollider, state, state.LastEnterTime));
+            yield break;
         }
-        else
-        {
-            ApplyLineColor(dangerColor);
-            GameOverService.Instance.TriggerGameOver();
-        }
+
+        ApplyLineColor(dangerColor);
+        GameOverService.Instance?.TriggerGameOver();
     }
 
     private void BeginDanger(StartZoneState state)
