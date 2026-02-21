@@ -12,9 +12,6 @@ public class ScoreUIUpdate : MonoBehaviour
     [SerializeField] private string scorePrefix = "Score: ";
     [SerializeField] private string bestPrefix = "Best: ";
 
-    [Header("Progress to best")]
-    [SerializeField] private Image progressFill;
-
     [Header("New best animation")]
     [SerializeField] private float punchScale = 1.12f;
     [SerializeField] private float punchDuration = 0.12f;
@@ -67,12 +64,6 @@ public class ScoreUIUpdate : MonoBehaviour
 
         if (scoreText != null) scoreText.text = scorePrefix + score;
         if (bestText != null) bestText.text = bestPrefix + best;
-
-        if (progressFill != null)
-        {
-            float progress = best > 0 ? Mathf.Clamp01((float)score / best) : 0f;
-            progressFill.fillAmount = progress;
-        }
 
         if (allowPunch && bestIncreased && bestText != null)
             Punch(bestText.transform);
