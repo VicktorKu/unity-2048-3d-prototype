@@ -15,7 +15,6 @@ public class StartZoneGameOver : MonoBehaviour
     private int _preferredColorId;
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
-    private bool _gameOver;
 
     private readonly Dictionary<StartZoneState, Coroutine> _checks = new();
     private readonly HashSet<StartZoneState> _dangerStates = new();
@@ -38,7 +37,8 @@ public class StartZoneGameOver : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (_gameOver) return;
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
 
         var cube = other.GetComponent<CubeEntity>();
         if (cube == null) return;
@@ -60,6 +60,9 @@ public class StartZoneGameOver : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         var cube = other.GetComponent<CubeEntity>();
         if (cube == null) return;
         if (!cube.IsLaunched) return;
@@ -81,7 +84,7 @@ public class StartZoneGameOver : MonoBehaviour
     {
         yield return new WaitForSeconds(insideTimeout);
 
-        if (_gameOver) yield break;
+        GameStateManager.Instance.IsGameOver();
 
         if (cubeCollider == null || cubeCollider.gameObject == null)
         {
@@ -102,9 +105,9 @@ public class StartZoneGameOver : MonoBehaviour
         {
             if (rb.IsSleeping())
             {
-                _gameOver = true;
                 ApplyLineColor(dangerColor);
-                GameOverController.Instance?.TriggerGameOver();
+                GameOverService.Instance.TriggerGameOver();
+                yield break;
             }
             else
             {
@@ -113,9 +116,8 @@ public class StartZoneGameOver : MonoBehaviour
         }
         else
         {
-            _gameOver = true;
             ApplyLineColor(dangerColor);
-            GameOverController.Instance?.TriggerGameOver();
+            GameOverService.Instance.TriggerGameOver();
         }
     }
 
@@ -127,7 +129,7 @@ public class StartZoneGameOver : MonoBehaviour
 
     private void EndDanger(StartZoneState state)
     {
-        if (_dangerStates.Remove(state) && _dangerStates.Count == 0 && !_gameOver)
+        if (_dangerStates.Remove(state) && _dangerStates.Count == 0)
             ApplyLineColor(safeColor);
     }
 

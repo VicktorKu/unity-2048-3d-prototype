@@ -18,6 +18,9 @@ public class CubeMergeDetector : MonoBehaviour
     [Min(0f)] public float maxLinearSpeed = 8f;
     [Min(0f)] public float maxAngularSpeed = 20f;
 
+    [Header("Merge cooldown")]
+    [Min(0f)] public float mergeCooldown = 0.05f;
+
     public LayerMask cubeLayer = ~0;  
 
     private CubeEntity _self;
@@ -35,14 +38,20 @@ public class CubeMergeDetector : MonoBehaviour
     private void FixedUpdate()
     {
         if (_mergeLocked) return;
+
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         if (_self == null) return;
 
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-
         if (_mergeLocked) return;
+
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
 
         var otherEntity = collision.collider.GetComponent<CubeEntity>();
         var otherMerge = collision.collider.GetComponent<CubeMergeDetector>();
@@ -52,7 +61,8 @@ public class CubeMergeDetector : MonoBehaviour
         if (gameObject.GetInstanceID() > otherEntity.gameObject.GetInstanceID()) return;
 
         var otherRb = collision.rigidbody;
-        if (otherRb == null) return;
+        if (_rb != null && _rb.isKinematic) return;
+        if (otherRb.isKinematic) return;
 
         Vector3 dirToOther = (transform.position - otherEntity.transform.position).normalized;
         float towardSpeed = Vector3.Dot(collision.relativeVelocity, dirToOther);
@@ -91,9 +101,9 @@ public class CubeMergeDetector : MonoBehaviour
             rb.AddForce(impulse, ForceMode.Impulse);        
             ClampVelocity(rb);
         }
+        UnlockAfterDelay();
 
         Destroy(other.gameObject);
-        _mergeLocked = false;
 
         AudioManager.Instance?.PlayMerge();
     }
@@ -112,5 +122,15 @@ public class CubeMergeDetector : MonoBehaviour
             rb.velocity = rb.velocity.normalized * maxLinearSpeed;
 
         rb.angularVelocity = Vector3.ClampMagnitude(rb.angularVelocity, maxAngularSpeed);
+    }
+    private void UnlockAfterDelay()
+    {
+        StartCoroutine(UnlockRoutine());
+    }
+
+    private System.Collections.IEnumerator UnlockRoutine()
+    {
+        yield return new WaitForSeconds(mergeCooldown);
+        _mergeLocked = false;
     }
 }

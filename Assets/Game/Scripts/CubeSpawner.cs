@@ -22,11 +22,15 @@ public class CubeSpawner : MonoBehaviour
 
     private void Start()
     {
-        SpawnInitial();
+        if (GameStateManager.Instance == null || GameStateManager.Instance.IsPlaying())
+            SpawnInitial();
     }
 
     public CubeEntity SpawnInitial()
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return null;
+
         Vector3 spawn = arena.spawnPoint.position;
 
         var cube = Instantiate(cubePrefab, spawn, Quaternion.identity);
@@ -66,15 +70,33 @@ public class CubeSpawner : MonoBehaviour
 
     public void SpawnNextDelayed()
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         if (_spawnRoutine != null) return;
         _spawnRoutine = StartCoroutine(SpawnNextRoutine());
     }
 
     private IEnumerator SpawnNextRoutine()
     {
-        yield return new WaitForSeconds(spawnDelay);
+        yield return new WaitForSecondsRealtime(spawnDelay);
+
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+        {
+            _spawnRoutine = null;
+            yield break;
+        }
+
         SpawnInitial();
         _spawnRoutine = null;
+    }
+    public void CancelScheduledSpawn()
+    {
+        if (_spawnRoutine != null)
+        {
+            StopCoroutine(_spawnRoutine);
+            _spawnRoutine = null;
+        }
     }
 
     public void ClearCurrentReferenceOnly()

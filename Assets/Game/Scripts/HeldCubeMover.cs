@@ -35,6 +35,12 @@ public class HeldCubeMover : MonoBehaviour
 
     private void Update()
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+        {
+            if (_holding) CancelHold();
+            return;
+        }
+
         var cube = spawner.Current;
         if (cube == null || cam == null) return;
 
@@ -77,6 +83,9 @@ public class HeldCubeMover : MonoBehaviour
 
     private void BeginHold(CubeEntity cube, Vector2 screenPos)
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         _holding = true;
 
         _grabStartScreenY = screenPos.y;
@@ -102,6 +111,9 @@ public class HeldCubeMover : MonoBehaviour
 
     private void HoldMove(CubeEntity cube, Vector2 screenPos)
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         float pointerXWorld = ScreenXToWorldX(screenPos, cube.transform.position);
         float desiredX = pointerXWorld + _grabOffsetXWorld;
 
@@ -134,9 +146,18 @@ public class HeldCubeMover : MonoBehaviour
         Vector3 world = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, z));
         return world.x;
     }
+    private void CancelHold()
+    {
+        _holding = false;
+        _currentPower01 = 0f;
+        powerUI?.Hide();
+    }
 
     private void ReleaseAndLaunch(CubeEntity cube)
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         _holding = false;
         cube.MarkLaunched();
 

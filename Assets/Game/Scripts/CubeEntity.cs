@@ -13,14 +13,23 @@ public class CubeEntity : MonoBehaviour
     private Vector3 _baseScale;
     private Coroutine _mergeScaleRoutine;
 
+    private CubeFaceLabels _labels;
+    private CubeColorVisual _color;
+
     private void Awake()
     {
+        _labels = GetComponent<CubeFaceLabels>();
+        _color = GetComponent<CubeColorVisual>();
+
         _baseScale = transform.localScale;
         NotifyValueChanged();
     }
 
     public void SetValue(int newValue)
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         if (!IsPowerOfTwo(newValue))
         {
             return;
@@ -32,6 +41,9 @@ public class CubeEntity : MonoBehaviour
 
     public void DoubleValue()
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            return;
+
         OnValueChanged?.Invoke(value);
         value *= 2;
         NotifyValueChanged();
@@ -39,13 +51,8 @@ public class CubeEntity : MonoBehaviour
 
     private void NotifyValueChanged()
     {
-        var labels = GetComponent<CubeFaceLabels>();
-        if (labels != null)
-            labels.SetValue(value);
-
-        var color = GetComponent<CubeColorVisual>();
-        if (color != null)
-            color.SetValue(value);
+        _labels?.SetValue(value);
+        _color?.SetValue(value);
     }
 
     private bool IsPowerOfTwo(int number)
