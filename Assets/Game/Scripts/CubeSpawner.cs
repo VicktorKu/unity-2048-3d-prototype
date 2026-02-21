@@ -19,11 +19,19 @@ public class CubeSpawner : MonoBehaviour
     
     private Coroutine _spawnRoutine;
 
+    public event System.Action<int> OnNextValueChanged;
+
+    private int _nextValue;
+    public int NextValue => _nextValue;
+
 
     private void Start()
     {
         if (GameStateManager.Instance == null || GameStateManager.Instance.IsPlaying())
+        {
+            RollNextValue();
             SpawnInitial();
+        }           
     }
 
     public CubeEntity SpawnInitial()
@@ -35,6 +43,9 @@ public class CubeSpawner : MonoBehaviour
 
         var cube = Instantiate(cubePrefab, spawn, Quaternion.identity);
         _current = cube;
+
+        cube.SetValue(_nextValue);
+        RollNextValue();
 
         if (scoreBinder != null)
             scoreBinder.RegisterCube(cube);
@@ -51,12 +62,14 @@ public class CubeSpawner : MonoBehaviour
         var rb = cube.GetComponent<Rigidbody>();
         if (rb != null) rb.isKinematic = true;
 
-        int v = Random.value < 0.75f ? 2 : 4;
-        cube.SetValue(v);
-
         return cube;
     }
 
+    private void RollNextValue()
+    {
+        _nextValue = Random.value < 0.75f ? 2 : 4;
+        OnNextValueChanged?.Invoke(_nextValue);
+    }
 
     private float GetCubeHalfHeightWorld(CubeEntity cube)
     {

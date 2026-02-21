@@ -150,7 +150,7 @@ public class HeldCubeMover : MonoBehaviour
     {
         _holding = false;
         _currentPower01 = 0f;
-        powerUI?.Hide();
+        powerUI?.HideFill();
     }
 
     private void ReleaseAndLaunch(CubeEntity cube)
@@ -174,10 +174,10 @@ public class HeldCubeMover : MonoBehaviour
             rb.AddForce(arena.transform.forward * (launchImpulse * powerMul), ForceMode.Impulse);
         }
 
-        powerUI?.Hide();
-
         spawner.ClearCurrentReferenceOnly();
         spawner.SpawnNextDelayed();
+
+        powerUI?.HideFill();
 
         AudioManager.Instance?.PlayLaunch();
     }
