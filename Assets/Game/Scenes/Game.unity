@@ -2363,6 +2363,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   insideTimeout: 2
+  armingDelay: 1
   lineRenderer: {fileID: 707702130}
   safeColor: {r: 0.5372549, g: 1, b: 1, a: 1}
   dangerColor: {r: 0.9056604, g: 0.36311856, b: 0.36311856, a: 1}

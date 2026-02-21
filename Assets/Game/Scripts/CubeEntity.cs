@@ -6,6 +6,8 @@ public class CubeEntity : MonoBehaviour
 {
     [SerializeField] private int value = 2;
     public bool IsLaunched { get; private set; }
+    public float LaunchedAt { get; private set; }
+
     public int Value => value;
     
     public event Action<int> OnValueChanged;
@@ -71,6 +73,7 @@ public class CubeEntity : MonoBehaviour
     public void MarkLaunched()
     {
         IsLaunched = true;
+        LaunchedAt = Time.time;
     }
 
     public void CacheBaseScale()

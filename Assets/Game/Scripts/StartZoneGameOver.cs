@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class StartZoneGameOver : MonoBehaviour
 {
-    [Header("How long cube may stay inside start zone before it is considered a loss")]
+    [Header("How long cube may stay inside start zone before it is considered a loss")]    
     [SerializeField] private float insideTimeout = 2f;
+    
+    [Header("Arming delay (ignore start zone right after launch)")]
+    [SerializeField] private float armingDelay = 0.45f;
 
     [Header("Line visuals")]
     [SerializeField] private Renderer lineRenderer;
@@ -14,7 +17,7 @@ public class StartZoneGameOver : MonoBehaviour
     [SerializeField] private string colorProperty = "_BaseColor";
 
     [SerializeField] private DeathZoneUI deathUI;
-
+    
     private int _preferredColorId;
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -47,20 +50,30 @@ public class StartZoneGameOver : MonoBehaviour
         if (cube == null) return;
         if (!cube.IsLaunched) return;
 
+        float armedAt = cube.LaunchedAt + armingDelay;
+
         var state = other.GetComponent<StartZoneState>();
         if (state == null) state = other.gameObject.AddComponent<StartZoneState>();
 
         state.IsInside = true;
         state.LastEnterTime = Time.time;
 
-        BeginDanger(state);
-        deathUI?.HideFill();
+        if (Time.time < armedAt)
+        {
+            StopCheck(state);
 
+            _checks[state] = StartCoroutine(WaitArmingThenStart(other, state, state.LastEnterTime, armedAt));
+            return;
+        }
+    }
 
-        if (_checks.TryGetValue(state, out var running) && running != null)
-            StopCoroutine(running);
-
-        _checks[state] = StartCoroutine(CheckStayedInside(other, state, state.LastEnterTime));
+    private void StopCheck(StartZoneState state)
+    {
+        if (_checks.TryGetValue(state, out var routine) && routine != null)
+        {
+            StopCoroutine(routine);
+            _checks.Remove(state);
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -77,8 +90,7 @@ public class StartZoneGameOver : MonoBehaviour
 
         state.IsInside = false;
 
-        if (_checks.TryGetValue(state, out var running) && running != null)
-            StopCoroutine(running);
+        StopCheck(state);
 
         _checks.Remove(state);
 
@@ -89,13 +101,13 @@ public class StartZoneGameOver : MonoBehaviour
 
     private IEnumerator CheckStayedInside(Collider cubeCollider, StartZoneState state, float enterTimeSnapshot)
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+            yield break;
+
         float startTime = Time.time;
 
         while (true)
         {
-            if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
-                yield break;
-
             if (cubeCollider == null || cubeCollider.gameObject == null)
             {
                 _checks.Remove(state);
@@ -107,6 +119,8 @@ public class StartZoneGameOver : MonoBehaviour
             if (state == null) yield break;
             if (!state.IsInside) { deathUI?.HideFill(); deathUI?.Hide(); yield break; }
             if (!Mathf.Approximately(state.LastEnterTime, enterTimeSnapshot)) yield break;
+
+            BeginDanger(state);
 
             float elapsed = Time.time - startTime;
             float t01 = elapsed / insideTimeout;
@@ -169,5 +183,32 @@ public class StartZoneGameOver : MonoBehaviour
         lineRenderer.GetPropertyBlock(_mpb);
         _mpb.SetColor(idToUse, c);
         lineRenderer.SetPropertyBlock(_mpb);
+    }
+
+    private IEnumerator WaitArmingThenStart(Collider cubeCollider, StartZoneState state, float enterTimeSnapshot, float armedAt)
+    {
+        while (Time.time < armedAt)
+        {
+            if (GameStateManager.Instance != null && !GameStateManager.Instance.IsPlaying())
+                yield break;
+
+            if (cubeCollider == null || cubeCollider.gameObject == null)
+            {
+                _checks.Remove(state);
+                yield break;
+            }
+
+            if (state == null) yield break;
+            if (!state.IsInside) yield break;
+            if (!Mathf.Approximately(state.LastEnterTime, enterTimeSnapshot)) yield break;
+
+            yield return null;
+        }
+
+        if (state == null || !state.IsInside) yield break;
+
+        StopCheck(state);
+
+        _checks[state] = StartCoroutine(CheckStayedInside(cubeCollider, state, state.LastEnterTime));
     }
 }
