@@ -30,7 +30,9 @@ public class GameOverService : MonoBehaviour
         if (GameStateManager.Instance != null)
             GameStateManager.Instance.ChangeState(GameStateId.GameOver);
 
-        GameOverUI.Instance?.SetData(score, best);
+        CubeStatsManager.Instance?.CommitLifetime();
+
+        GameOverUI.Instance?.ShowGameOver(score, best);
 
         AudioManager.Instance?.PlayGameOver();
     }

@@ -29,6 +29,7 @@ public class CubeSpawner : MonoBehaviour
     {
         if (GameStateManager.Instance == null || GameStateManager.Instance.IsPlaying())
         {
+            CubeStatsManager.Instance?.StartNewRound();
             RollNextValue();
             SpawnInitial();
         }           
@@ -45,6 +46,9 @@ public class CubeSpawner : MonoBehaviour
         _current = cube;
 
         cube.SetValue(_nextValue);
+        
+        CubeStatsManager.Instance?.RegisterCubeCreated(cube.Value);
+        
         RollNextValue();
 
         if (scoreBinder != null)
