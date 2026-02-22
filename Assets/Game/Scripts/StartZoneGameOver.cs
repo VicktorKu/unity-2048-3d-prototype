@@ -65,6 +65,11 @@ public class StartZoneGameOver : MonoBehaviour
             _checks[state] = StartCoroutine(WaitArmingThenStart(other, state, state.LastEnterTime, armedAt));
             return;
         }
+
+        BeginDanger(state);
+        deathUI?.HideFill();
+
+        _checks[state] = StartCoroutine(CheckStayedInside(other, state, state.LastEnterTime));
     }
 
     private void StopCheck(StartZoneState state)
@@ -210,5 +215,18 @@ public class StartZoneGameOver : MonoBehaviour
         StopCheck(state);
 
         _checks[state] = StartCoroutine(CheckStayedInside(cubeCollider, state, state.LastEnterTime));
+    }
+
+    public void ForceCleanupState(StartZoneState state)
+    {
+        if (state == null) return;
+
+        StopCheck(state);
+        _checks.Remove(state);
+
+        if (_dangerStates.Remove(state) && _dangerStates.Count == 0)
+            ApplyLineColor(safeColor);
+
+        deathUI?.HideFill();
     }
 }

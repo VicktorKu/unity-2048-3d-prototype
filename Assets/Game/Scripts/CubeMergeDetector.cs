@@ -103,6 +103,13 @@ public class CubeMergeDetector : MonoBehaviour
         }
         UnlockAfterDelay();
 
+        var otherState = other.GetComponent<StartZoneState>();
+        if (otherState != null)
+        {
+            var zone = FindObjectOfType<StartZoneGameOver>();
+            if (zone != null)
+                zone.ForceCleanupState(otherState);
+        }
         Destroy(other.gameObject);
 
         AudioManager.Instance?.PlayMerge();
