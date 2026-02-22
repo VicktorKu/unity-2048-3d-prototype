@@ -4,6 +4,9 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
+    private const string MusicKey = "audio_music_volume_v1";
+    private const string SfxKey = "audio_sfx_volume_v1";
+
     [Header("Audio Sources")]
     [SerializeField] private AudioSource backgroundLoop;
     [SerializeField] private AudioSource launchClip;
@@ -23,12 +26,30 @@ public class AudioManager : MonoBehaviour
         }
 
         Instance = this;
+        LoadVolumes();
+        ApplyVolumes();
     }
 
     private void Start()
     {
-        ApplyVolumes();
         PlayBackground();
+    }
+
+    public float GetMusicVolume() => musicVolume;
+    public float GetSfxVolume() => sfxVolume;
+
+    public void SetMusicVolume(float v, bool save = true)
+    {
+        musicVolume = Mathf.Clamp01(v);
+        ApplyVolumes();
+        if (save) SaveVolumes();
+    }
+
+    public void SetSfxVolume(float v, bool save = true)
+    {
+        sfxVolume = Mathf.Clamp01(v);
+        ApplyVolumes();
+        if (save) SaveVolumes();
     }
 
     public void ApplyVolumes()
@@ -44,6 +65,22 @@ public class AudioManager : MonoBehaviour
 
         if (gameOverClip != null)
             gameOverClip.volume = sfxVolume;
+    }
+
+    private void LoadVolumes()
+    {
+        if (PlayerPrefs.HasKey(MusicKey))
+            musicVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(MusicKey));
+
+        if (PlayerPrefs.HasKey(SfxKey))
+            sfxVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(SfxKey));
+    }
+
+    private void SaveVolumes()
+    {
+        PlayerPrefs.SetFloat(MusicKey, musicVolume);
+        PlayerPrefs.SetFloat(SfxKey, sfxVolume);
+        PlayerPrefs.Save();
     }
 
     public void PlayBackground()

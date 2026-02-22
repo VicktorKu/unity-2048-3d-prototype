@@ -7,7 +7,7 @@ public class PausedState : IGameState
     public void Enter(GameStateManager gsm)
     {
         Time.timeScale = 0f;
-        AudioListener.pause = true;
+        //AudioListener.pause = true;
 
         PauseUI.Instance?.SetVisible(true);
     }
