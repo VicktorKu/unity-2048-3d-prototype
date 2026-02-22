@@ -49,12 +49,13 @@ public class ArenaBuilder : MonoBehaviour
         floor.localScale = new Vector3(width, floorThickness, length);
         floor.localPosition = new Vector3(0f, -floorThickness * 0.5f, 0f);
 
-        float wallZ = length + wallThickness * 2f;
+        float wallZ = length + wallThickness;
         wallLeft.localScale = new Vector3(wallThickness, wallHeight, wallZ);
         wallRight.localScale = new Vector3(wallThickness, wallHeight, wallZ);
 
-        wallLeft.localPosition = new Vector3(-halfW - wallThickness * 0.5f, wallHeight * 0.5f, 0f);
-        wallRight.localPosition = new Vector3(halfW + wallThickness * 0.5f, wallHeight * 0.5f, 0f);
+        float wallCenterZ = wallThickness * 0.5f;
+        wallLeft.localPosition = new Vector3(-halfW - wallThickness * 0.5f, wallHeight * 0.5f, wallCenterZ);
+        wallRight.localPosition = new Vector3(halfW + wallThickness * 0.5f, wallHeight * 0.5f, wallCenterZ);
 
         float wallX = width + wallThickness * 2f;
         wallTop.localScale = new Vector3(wallX, wallHeight, wallThickness);
