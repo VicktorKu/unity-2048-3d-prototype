@@ -159,6 +159,7 @@ public class HeldCubeMover : MonoBehaviour
             return;
 
         _holding = false;
+
         cube.MarkLaunched();
 
         float powerMul = Mathf.Lerp(minPowerPercent, 1f, _currentPower01);
@@ -180,6 +181,8 @@ public class HeldCubeMover : MonoBehaviour
         powerUI?.HideFill();
 
         AudioManager.Instance?.PlayLaunch();
+
+        FindObjectOfType<LaunchHint>()?.OnFirstLaunch();
     }
 
     private float GetCubeHalfWidthWorld(CubeEntity cube)
